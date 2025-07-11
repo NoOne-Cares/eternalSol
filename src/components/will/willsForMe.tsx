@@ -1,9 +1,9 @@
 import React from 'react'
 
-const willsForMe = () => {
+const WillsForMe = () => {
     return (
         <div>willsForMe</div>
     )
 }
 
-export default willsForMe
+export default WillsForMe
