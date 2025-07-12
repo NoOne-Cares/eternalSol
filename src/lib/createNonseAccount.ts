@@ -20,7 +20,6 @@ export async function createNonceAccount({
     const { blockhash } = await connection.getLatestBlockhash()
 
     const tx = new Transaction({ feePayer: authKeypair.publicKey, recentBlockhash: blockhash })
-
     tx.add(
         SystemProgram.createAccount({
             fromPubkey: authKeypair.publicKey,
@@ -34,9 +33,14 @@ export async function createNonceAccount({
             authorizedPubkey: authKeypair.publicKey,
         })
     )
+    try {
+        tx.sign(nonceKeypair, authKeypair)
 
-    tx.sign(nonceKeypair, authKeypair)
+        const sig = await sendAndConfirmRawTransaction(connection, tx.serialize())
+        return sig
+    } catch (error) {
+        return "fall to create will"
+    }
 
-    const sig = await sendAndConfirmRawTransaction(connection, tx.serialize())
-    return sig
+
 }

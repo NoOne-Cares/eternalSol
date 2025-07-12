@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         } catch (error) {
             return Response.json({
                 success: false,
-                message: "server error"
+                message: "Fail to fetch wills"
             },
                 {
                     status: 500

@@ -6,8 +6,8 @@ export interface Will extends Document {
     reciver: string;
     duration: string;
     transaction: string;
-    amount: string;
-    createdAt: Date;
+    amount: number;
+    createdAt: string;
 }
 
 const WillSchema: Schema<Will> = new Schema({
@@ -33,8 +33,12 @@ const WillSchema: Schema<Will> = new Schema({
         required: true,
     },
     createdAt: {
-        type: Date,
+        type: String,
         required: true,
+    },
+    amount: {
+        type: Number,
+        required: true
     }
 })
 

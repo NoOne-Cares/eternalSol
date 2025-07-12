@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import React, { useCallback, useState } from 'react'
 import {
     Keypair,
@@ -9,22 +9,33 @@ import {
     PublicKey,
     NonceAccount,
     sendAndConfirmRawTransaction,
+    Connection,
 } from '@solana/web3.js'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { createNonceAccount } from '@/lib/createNonseAccount'
+import { signTransactionWithNonce } from '@/lib/signWithNonce'
 
 const Durable: React.FC = () => {
     const { connection } = useConnection()
     const { publicKey, signTransaction } = useWallet()
     const wallet = useWallet()
-    let nonceKeypair: Keypair
 
+    const [NonceKeypair, setNonceKeyPair] = useState(() => Keypair.generate())
     const nonceKeypairAuth = process.env.NEXT_PUBLIC_SOLANA_SECRET_KEY
     if (!nonceKeypairAuth) throw new Error('Missing SOLANA_SECRET_KEY')
 
     const secretKey = Uint8Array.from(Buffer.from(nonceKeypairAuth, 'base64'))
 
-    const authkeypair = Keypair.fromSecretKey(secretKey)
-    console.log('🔑 Loaded Keypair Public Key:', authkeypair.publicKey.toBase58())
+    // const createKey = () => {
+    //     const key: Keypair | null = Keypair.generate();
+    //     setNonceKeyPair(key)
+    //     alert(`✅ Key created Created!\nSignature: ${key.publicKey}`)
+    // }
+
+
+
+    const authKeypair = Keypair.fromSecretKey(secretKey)
+    console.log('🔑 Loaded Keypair Public Key:', authKeypair.publicKey.toBase58())
     const [signedTxBase64, setSignedTxBase64] = useState<string | null>(null)
     const [status, setStatus] = useState<string>('')
 
@@ -32,51 +43,50 @@ const Durable: React.FC = () => {
     const recipient = new PublicKey(base58String)
 
     const handleCreateNonce = useCallback(async () => {
-        if (!publicKey || !wallet) return alert('❌ Wallet not connected')
+        if (!publicKey) return alert('❌ Wallet not connected')
         findlatesttime();
-        try {
-            [nonceKeypair] = useState(() => Keypair.generate())
-            const lamports = await connection.getMinimumBalanceForRentExemption(NONCE_ACCOUNT_LENGTH)
-            const { blockhash } = await connection.getLatestBlockhash()
+        const nonceKeypair = Keypair.generate();
+        setNonceKeyPair(nonceKeypair);
+        console.log(NonceKeypair + " " + "this is new" + nonceKeypair)
 
-            const tx = new Transaction({ feePayer: authkeypair.publicKey, recentBlockhash: blockhash })
-
-            tx.add(
-                SystemProgram.createAccount({
-                    fromPubkey: authkeypair.publicKey, // ✅ wallet pays
-                    newAccountPubkey: nonceKeypair.publicKey,
-                    lamports,
-                    space: NONCE_ACCOUNT_LENGTH,
-                    programId: SystemProgram.programId,
-                }),
-                SystemProgram.nonceInitialize({
-                    noncePubkey: nonceKeypair.publicKey,
-                    authorizedPubkey: authkeypair.publicKey,
-                })
-            )
-
-            // Let the wallet sign (must include nonceKeypair and nonceKeypairAuth manually)
-            tx.sign(nonceKeypair, authkeypair)
-            let sig = ""
-            console.log("sucess")
-            sig = await sendAndConfirmRawTransaction(
-                connection,
-                tx.serialize(),
-            );
-            console.log("Nonce initiated: ", sig);
-
+        const sig = await createNonceAccount({
+            connection,
+            nonceKeypair,
+            authKeypair
+        });
+        console.log(sig)
+        if (sig != "fall to create will") {
             alert(`✅ Durable Nonce Account Created!\nSignature: ${sig}`)
-        } catch (err) {
-            console.error(err)
+        } else {
             alert('❌ Failed to create nonce account')
+            return
         }
-    }, [connection, publicKey, signTransaction, wallet, nonceKeypairAuth])
+        const noncePubkey = nonceKeypair.publicKey;
+        try {
+            const txSignedByNonce = await signTransactionWithNonce({
+                connection,
+                noncePubkey,
+                recipient,
+                publicKey,
+                authKeypair,
+                signTransaction
+            });
+
+            console.log("Signed TX (base64):", txSignedByNonce);
+            alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
+            setSignedTxBase64(txSignedByNonce)
+        } catch (err: any) {
+            alert("❌ Failed to sign transaction: " + err.message);
+        }
+
+
+    }, [connection, nonceKeypairAuth])
 
     const handleSignWithNonce = useCallback(async () => {
         if (!publicKey || !signTransaction) return alert('❌ Wallet not connected')
 
         try {
-            const accountInfo = await connection.getAccountInfo(nonceKeypair.publicKey)
+            const accountInfo = await connection.getAccountInfo(NonceKeypair.publicKey)
             if (!accountInfo?.data) throw new Error('Nonce account not found')
 
             const nonceAccount = NonceAccount.fromAccountData(accountInfo.data)
@@ -87,8 +97,8 @@ const Durable: React.FC = () => {
             })
 
             const advanceNonceIx = SystemProgram.nonceAdvance({
-                noncePubkey: nonceKeypair.publicKey,
-                authorizedPubkey: authkeypair.publicKey,
+                noncePubkey: NonceKeypair.publicKey,
+                authorizedPubkey: authKeypair.publicKey,
             })
 
             const transferIx = SystemProgram.transfer({
@@ -100,7 +110,7 @@ const Durable: React.FC = () => {
             tx.add(advanceNonceIx, transferIx)
 
             // Sign with nonce authority, then let wallet sign
-            tx.partialSign(authkeypair)
+            tx.partialSign(authKeypair)
             const signedTx = await signTransaction(tx)
 
             const serialized = signedTx.serialize().toString('base64')
@@ -175,6 +185,12 @@ const Durable: React.FC = () => {
                     {status}
                 </div>
             )}
+            {/* <button
+                className="w-full py-2 px-4 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+                onClick={createKey}
+            >
+                create key
+            </button> */}
         </div>
     )
 }

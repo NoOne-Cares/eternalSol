@@ -26,7 +26,6 @@ const WillCreateForm = () => {
         minutes: '',
         seconds: '',
     });
-    const [_, setShowModal] = useAtom(showWillModalAtom)
     const [receiverError, setReceiverError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -80,7 +79,6 @@ const WillCreateForm = () => {
         };
 
         console.log('Will Payload:', payload);
-        // Handle smart contract or backend call here
     };
 
     return (

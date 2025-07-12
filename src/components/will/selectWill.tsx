@@ -12,8 +12,8 @@ const SelectWill = () => {
                 <button
                     onClick={() => setActiveTab('myWills')}
                     className={`px-4 py-2 rounded-l-2xl transition-colors duration-200 font-medium ${activeTab === 'myWills'
-                            ? 'bg-[--primary] text-[--primary-foreground]'
-                            : 'bg-transparent text-[--accent-foreground] hover:bg-[--muted]'
+                        ? 'bg-[--primary] text-[--primary-foreground]'
+                        : 'bg-transparent text-[--accent-foreground] hover:bg-[--muted]'
                         }`}
                 >
                     My Wills
@@ -21,8 +21,8 @@ const SelectWill = () => {
                 <button
                     onClick={() => setActiveTab('willsForMe')}
                     className={`px-4 py-2 rounded-r-2xl transition-colors duration-200 font-medium ${activeTab === 'willsForMe'
-                            ? 'bg-[--primary] text-[--primary-foreground]'
-                            : 'bg-transparent text-[--accent-foreground] hover:bg-[--muted]'
+                        ? 'bg-[--primary] text-[--primary-foreground]'
+                        : 'bg-transparent text-[--accent-foreground] hover:bg-[--muted]'
                         }`}
                 >
                     Wills For Me

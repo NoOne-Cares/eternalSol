@@ -1,13 +1,13 @@
-// lib/signWithNonce.ts
 import {
     Connection,
-    Keypair,
-    SystemProgram,
-    Transaction,
-    LAMPORTS_PER_SOL,
-    NonceAccount,
     PublicKey,
-} from '@solana/web3.js'
+    Keypair,
+    Transaction,
+    SystemProgram,
+    NonceAccount,
+    LAMPORTS_PER_SOL,
+    VersionedTransaction,
+} from '@solana/web3.js';
 
 export async function signTransactionWithNonce({
     connection,
@@ -17,37 +17,52 @@ export async function signTransactionWithNonce({
     authKeypair,
     signTransaction,
 }: {
-    connection: Connection,
-    noncePubkey: PublicKey,
-    recipient: PublicKey,
-    publicKey: PublicKey,
-    authKeypair: Keypair,
-    signTransaction: (tx: Transaction) => Promise<Transaction>,
+    connection: Connection;
+    noncePubkey: PublicKey;
+    recipient: PublicKey;
+    publicKey: PublicKey;
+    authKeypair: Keypair;
+    signTransaction?: <T extends Transaction | VersionedTransaction>(tx: T) => Promise<T>;
 }): Promise<string> {
-    const accountInfo = await connection.getAccountInfo(noncePubkey)
-    if (!accountInfo?.data) throw new Error('Nonce account not found')
+    try {
+        if (!signTransaction) {
+            throw new Error('❌ Wallet does not support transaction signing.');
+        }
 
-    const nonceAccount = NonceAccount.fromAccountData(accountInfo.data)
+        const accountInfo = await connection.getAccountInfo(noncePubkey);
+        if (!accountInfo?.data) {
+            throw new Error('❌ Nonce account not found.');
+        }
 
-    const tx = new Transaction({
-        feePayer: publicKey,
-        recentBlockhash: nonceAccount.nonce,
-    })
+        const nonceAccount = NonceAccount.fromAccountData(accountInfo.data);
 
-    tx.add(
-        SystemProgram.nonceAdvance({
-            noncePubkey,
-            authorizedPubkey: authKeypair.publicKey,
-        }),
-        SystemProgram.transfer({
-            fromPubkey: publicKey,
-            toPubkey: recipient,
-            lamports: 0.001 * LAMPORTS_PER_SOL,
-        })
-    )
+        const tx = new Transaction({
+            feePayer: publicKey,
+            recentBlockhash: nonceAccount.nonce,
+        });
 
-    tx.partialSign(authKeypair)
+        tx.add(
+            SystemProgram.nonceAdvance({
+                noncePubkey,
+                authorizedPubkey: authKeypair.publicKey,
+            }),
+            SystemProgram.transfer({
+                fromPubkey: publicKey,
+                toPubkey: recipient,
+                lamports: 0.001 * LAMPORTS_PER_SOL,
+            })
+        );
 
-    const signedTx = await signTransaction(tx)
-    return signedTx.serialize().toString('base64')
+        tx.partialSign(authKeypair);
+
+        const signedTx = await signTransaction(tx);
+        const serializedTx = signedTx.serialize().toString('base64');
+
+        console.log('✅ Signed transaction with durable nonce:', serializedTx);
+
+        return serializedTx;
+    } catch (err: any) {
+        console.error('❌ Error signing transaction with nonce:', err);
+        throw new Error(err.message || 'Unknown error during signing');
+    }
 }
