@@ -8,6 +8,7 @@ import { createNonceAccount } from '@/lib/createNonseAccount';
 import { signTransactionWithNonce } from '@/lib/signWithNonce';
 import { useAtom } from 'jotai';
 import { oracleConnection, walletPublicKey } from '@/store/jotaiStore';
+import { encrypt } from '@/lib/encription';
 
 
 
@@ -31,7 +32,7 @@ const WillCreateForm = () => {
     // const base58String = 'AwZF8bvPojfNbZN8SrUN8bzbDH3evZv3hRcvy85zUNeQ'
     // const recipient = new PublicKey(base58String)
 
-    const handleCreateNonce = useCallback(async (recipient: PublicKey) => {
+    const handleCreateNonce = useCallback(async (recipient: PublicKey, amount: number) => {
         if (!publicKey) return alert('❌ Wallet not connected')
         const nonceKeypair = Keypair.generate();
         setNonceKeyPair(nonceKeypair);
@@ -63,16 +64,19 @@ const WillCreateForm = () => {
                     recipient,
                     publicKey,
                     authKeypair,
+                    amount,
                     signTransaction
                 });
 
             }
             console.log("Signed TX (base64):", txSignedByNonce);
+            console.log(typeof txSignedByNonce)
             alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
             setSignedTxBase64(txSignedByNonce)
+            const hashedSignature = encrypt(txSignedByNonce)
+            return hashedSignature
         } catch (error: any) {
-            alert("❌ Failed to sign transaction: " + error.message);
-            throw error
+            return null
         }
     }, [connection, nonceKeypairAuth])
 
@@ -120,7 +124,7 @@ const WillCreateForm = () => {
             seconds,
         } = formData;
 
-        
+
 
         const totalDurationInSeconds =
             (parseInt(years) || 0) * 365 * 24 * 60 * 60 +
@@ -138,28 +142,27 @@ const WillCreateForm = () => {
             totalDurationInSeconds,
         };
 
-        
+
 
         if (!isValidSolanaAddress(formData.receiver)) {
             setReceiverError('Invalid Solana public key');
             return;
         }
-        try {
-            await handleCreateNonce(new PublicKey(formData.receiver))
-            alert(`Success ${signedTxBase64}`);
-        } catch (error: any) {
-            alert("❌ Failed to sign transaction: " + error.message);
-            return
-        } finally {
-            setIsSubmitting(false)
+
+        const hasedKey = await handleCreateNonce(new PublicKey(formData.receiver), parseInt(formData.amount))
+        if (hasedKey) {
+
+        } else {
+
         }
+        setIsSubmitting(false)
+    }
 
-        
 
-        
 
-        console.log('Will Payload:', payload);
-    };
+
+
+    // console.log('Will Payload:', payload);
 
     return (
         <div className="relative max-w-2xl mx-auto px-6 py-12 bg-card text-card-foreground rounded-lg shadow-md">
@@ -295,6 +298,6 @@ const WillCreateForm = () => {
             </form>
         </div>
     );
-};
+}
 
-export default WillCreateForm;
+export default WillCreateForm

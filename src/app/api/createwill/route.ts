@@ -12,11 +12,11 @@ export async function POST(request: Request) {
         if (existingWill) {
             return new Response(JSON.stringify({
                 success: false,
-                message: "A will already exists for this sender and receiver pair."
+                message: "You can't create two will from same public address"
             }), { status: 409 });
         }
 
-        const createdAt = Math.floor(Date.now() / 1000); // current time in seconds
+        const createdAt = Math.floor(Date.now() / 1000);
 
         const newWill = new WillModal({
             message,
