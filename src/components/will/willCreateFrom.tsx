@@ -1,20 +1,82 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { PublicKey } from '@solana/web3.js';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { isValidSolanaAddress } from '@/lib/validKey';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { createNonceAccount } from '@/lib/createNonseAccount';
+import { signTransactionWithNonce } from '@/lib/signWithNonce';
 import { useAtom } from 'jotai';
-import { showWillModalAtom } from '@/store/jotaiStore';
+import { oracleConnection, walletPublicKey } from '@/store/jotaiStore';
 
-const isValidSolanaAddress = (address: string): boolean => {
-    try {
-        const key = new PublicKey(address);
-        return PublicKey.isOnCurve(key); // Valid ed25519 key
-    } catch {
-        return false;
-    }
-};
+
 
 const WillCreateForm = () => {
+    const [signedTxBase64, setSignedTxBase64] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [publicKey] = useAtom(walletPublicKey)
+    const [connection] = useAtom(oracleConnection)
+    const { signTransaction } = useWallet()
+
+    const [NonceKeypair, setNonceKeyPair] = useState(() => Keypair.generate())
+    const nonceKeypairAuth = process.env.NEXT_PUBLIC_SOLANA_SECRET_KEY
+    if (!nonceKeypairAuth) throw new Error('Missing SOLANA_SECRET_KEY')
+    const secretKey = Uint8Array.from(Buffer.from(nonceKeypairAuth, 'base64'))
+    const authKeypair = Keypair.fromSecretKey(secretKey)
+
+
+    // console.log('🔑 Loaded Keypair Public Key:', authKeypair.publicKey.toBase58())
+
+
+    // const base58String = 'AwZF8bvPojfNbZN8SrUN8bzbDH3evZv3hRcvy85zUNeQ'
+    // const recipient = new PublicKey(base58String)
+
+    const handleCreateNonce = useCallback(async (recipient: PublicKey) => {
+        if (!publicKey) return alert('❌ Wallet not connected')
+        const nonceKeypair = Keypair.generate();
+        setNonceKeyPair(nonceKeypair);
+        console.log(NonceKeypair + " " + "this is new" + nonceKeypair)
+
+        let sig = ""
+        if (connection) {
+            sig = await createNonceAccount({
+                connection,
+                nonceKeypair,
+                authKeypair
+            });
+        }
+        console.log(sig)
+        if (sig != "fall to create will") {
+            alert(`✅ Durable Nonce Account Created!\nSignature: ${sig}`)
+        } else {
+            alert('❌ Failed to create nonce account')
+            throw new Error("fail to create nonce")
+        }
+        const noncePubkey = nonceKeypair.publicKey;
+        let txSignedByNonce = ""
+        try {
+            if (connection && publicKey) {
+                alert(`✅ Durable Nonce Account Created!\nSignature: ${connection}`)
+                txSignedByNonce = await signTransactionWithNonce({
+                    connection,
+                    noncePubkey,
+                    recipient,
+                    publicKey,
+                    authKeypair,
+                    signTransaction
+                });
+
+            }
+            console.log("Signed TX (base64):", txSignedByNonce);
+            alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
+            setSignedTxBase64(txSignedByNonce)
+        } catch (error: any) {
+            alert("❌ Failed to sign transaction: " + error.message);
+            throw error
+        }
+    }, [connection, nonceKeypairAuth])
+
+
     const [formData, setFormData] = useState({
         message: '',
         receiver: '',
@@ -43,14 +105,9 @@ const WillCreateForm = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!isValidSolanaAddress(formData.receiver)) {
-            setReceiverError('Invalid Solana public key');
-            return;
-        }
-
+        setIsSubmitting(true)
         const {
             message,
             receiver,
@@ -63,6 +120,8 @@ const WillCreateForm = () => {
             seconds,
         } = formData;
 
+        
+
         const totalDurationInSeconds =
             (parseInt(years) || 0) * 365 * 24 * 60 * 60 +
             (parseInt(months) || 0) * 30 * 24 * 60 * 60 +
@@ -73,10 +132,31 @@ const WillCreateForm = () => {
 
         const payload = {
             message,
+            publicKey,
             receiver,
             amount: parseFloat(amount),
             totalDurationInSeconds,
         };
+
+        
+
+        if (!isValidSolanaAddress(formData.receiver)) {
+            setReceiverError('Invalid Solana public key');
+            return;
+        }
+        try {
+            await handleCreateNonce(new PublicKey(formData.receiver))
+            alert(`Success ${signedTxBase64}`);
+        } catch (error: any) {
+            alert("❌ Failed to sign transaction: " + error.message);
+            return
+        } finally {
+            setIsSubmitting(false)
+        }
+
+        
+
+        
 
         console.log('Will Payload:', payload);
     };
@@ -97,7 +177,8 @@ const WillCreateForm = () => {
                         onChange={handleChange}
                         rows={4}
                         className="w-full bg-input text-foreground border border-border rounded-md px-4 py-2"
-                        placeholder="Optional personal message"
+                        placeholder="Personal message"
+                        required
                     />
                 </div>
 
@@ -205,9 +286,10 @@ const WillCreateForm = () => {
                 <div>
                     <button
                         type="submit"
-                        className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium hover:bg-primary/90 transition"
+                        disabled={isSubmitting}
+                        className={`bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                     >
-                        Create Will
+                        {isSubmitting ? 'Submitting...' : 'Create Will'}
                     </button>
                 </div>
             </form>

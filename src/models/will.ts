@@ -1,13 +1,12 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, NumberExpression, Schema } from "mongoose";
 
 export interface Will extends Document {
     message: string;
     sender: string;
     reciver: string;
-    duration: string;
+    duration: number;
     transaction: string;
     amount: number;
-    createdAt: string;
 }
 
 const WillSchema: Schema<Will> = new Schema({
@@ -25,14 +24,10 @@ const WillSchema: Schema<Will> = new Schema({
         required: true,
     },
     duration: {
-        type: String,
+        type: Number,
         required: true,
     },
     transaction: {
-        type: String,
-        required: true,
-    },
-    createdAt: {
         type: String,
         required: true,
     },

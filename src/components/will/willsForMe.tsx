@@ -1,8 +1,13 @@
+"use client"
+
 import React from 'react'
+
 
 const WillsForMe = () => {
     return (
-        <div>willsForMe</div>
+
+        <div>willsForMe
+        </div>
     )
 }
 

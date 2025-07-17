@@ -1,8 +1,8 @@
 import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
-import { Provider } from 'jotai'
 import React from 'react'
+import { Provider } from 'jotai'
 
 // export const metadata: Metadata = {
 //   title: 'EternalSOL',
@@ -20,11 +20,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
-        <AppProviders>
-          <Provider>
+        <Provider>
+          <AppProviders>
             <AppLayout links={links}>{children}</AppLayout>
-          </Provider>
-        </AppProviders>
+          </AppProviders>
+        </Provider>
       </body>
     </html>
   )

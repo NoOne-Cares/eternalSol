@@ -5,9 +5,14 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { Button } from '../ui/button';
 import { WalletButton } from '@/components/solana/solana-provider'
 import WillCreateForm from '../will/willCreateFrom';
+import { useAtom } from 'jotai';
+import { walletPublicKey } from '@/store/jotaiStore';
+
 const Hero: FC = () => {
-  const { connected, connect } = useWallet();
+  const { connected, connect, publicKey } = useWallet();
   const targetRef = useRef<HTMLDivElement>(null);
+  const [walletPubKey, setWalletPubicKey] = useAtom(walletPublicKey)
+
 
   const handleClick = () => {
     targetRef.current?.scrollIntoView({ behavior: 'smooth' });
