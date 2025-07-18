@@ -15,6 +15,7 @@ export async function signTransactionWithNonce({
     recipient,
     publicKey,
     authKeypair,
+    amount,
     signTransaction,
 }: {
     connection: Connection;
@@ -22,6 +23,7 @@ export async function signTransactionWithNonce({
     recipient: PublicKey;
     publicKey: PublicKey;
     authKeypair: Keypair;
+    amount: number,
     signTransaction?: <T extends Transaction | VersionedTransaction>(tx: T) => Promise<T>;
 }): Promise<string> {
     try {
@@ -49,7 +51,7 @@ export async function signTransactionWithNonce({
             SystemProgram.transfer({
                 fromPubkey: publicKey,
                 toPubkey: recipient,
-                lamports: 0.001 * LAMPORTS_PER_SOL,
+                lamports: amount * LAMPORTS_PER_SOL,
             })
         );
 

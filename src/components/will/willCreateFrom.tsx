@@ -11,6 +11,7 @@ import { oracleConnection, walletPublicKey } from '@/store/jotaiStore';
 import { encrypt } from '@/lib/encription';
 import { useMutation } from '@tanstack/react-query';
 import { CreateWill } from '../../services/CreateWill';
+import { CanCreateWill } from '@/services/CanCreateWill';
 
 
 
@@ -53,6 +54,11 @@ const WillCreateForm = () => {
             console.error('❌ Error creating will:', error);
             alert('❌ Failed to create will');
         },
+    });
+
+    const canCreateWillMutation = useMutation({
+        mutationFn: ({ sender, receiver }: { sender: string; receiver: string }) =>
+            CanCreateWill(sender, receiver),
     });
     // console.log('🔑 Loaded Keypair Public Key:', authKeypair.publicKey.toBase58())
 
@@ -177,23 +183,44 @@ const WillCreateForm = () => {
             return;
         }
 
-        const hasedKey = await handleCreateNonce(new PublicKey(formData.receiver), parseInt(formData.amount))
-        if (hasedKey) {
-            try {
-                await createWillMutation.mutateAsync({
-                    message,
-                    sender: publicKey!.toBase58(),
-                    receiver,
-                    duration: totalDurationInSeconds,
-                    transaction: hasedKey,
-                    amount: parseFloat(amount),
-                });
-            } catch (err) {
-                console.error("Mutation error:", err);
+        try {
+            const senderAddress = publicKey!.toBase58();
+
+            // ✅ Step 1: Call canCreateWill
+            const canCreate = await canCreateWillMutation.mutateAsync({
+                sender: senderAddress,
+                receiver,
+            });
+
+            if (!canCreate.success) {
+                alert('❌ You are not allowed to create a will with this receiver.');
+                setIsSubmitting(false);
+                return;
             }
-        } else {
-            alert("❌ Signing failed. Cannot create will.");
+
+            // ✅ Step 2: Sign with nonce
+            const hashedTx = await handleCreateNonce(new PublicKey(receiver), parseFloat(amount));
+            if (!hashedTx) {
+                alert("❌ Signing failed. Cannot create will.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // ✅ Step 3: Now call createWill
+            await createWillMutation.mutateAsync({
+                message,
+                sender: senderAddress,
+                receiver,
+                duration: totalDurationInSeconds,
+                transaction: hashedTx,
+                amount: parseFloat(amount),
+            });
+
+        } catch (err) {
+            console.error("❌ Error submitting will form:", err);
+            alert("❌ Something went wrong while creating the will.");
         }
+
         setIsSubmitting(false);
     }
 

@@ -98,14 +98,7 @@ const Durable: React.FC = () => {
     }, [signedTxBase64, connection])
 
     ///find block time
-    // const findlatesttime = async () => {
-    //     const signatures = await connection.getSignaturesForAddress(publicKey!, { limit: 1 });
-    //     const lastSig = signatures[0];
-    //     const blockTime = await connection.getBlockTime(lastSig.slot);
-    //     if (blockTime == null) return;
-    //     const lastTxDate = new Date(blockTime * 1000).toLocaleString();
-    //     console.log(`🕒 Last transaction time: ${lastTxDate}`);
-    // }
+    // 
 
     return (
         <div className="p-8 max-w-xl mx-auto space-y-6">

@@ -1,9 +1,6 @@
 import { connectToDatabase } from "@/lib/db";
 import WillModal from "@/models/will";
 
-export async function GET() {
-    return new Response("GET request is working", { status: 200 });
-}
 
 export async function PUT(request: Request) {
     await connectToDatabase();

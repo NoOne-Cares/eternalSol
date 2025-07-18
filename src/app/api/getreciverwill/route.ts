@@ -4,7 +4,7 @@ import WillModal from '@/models/will'
 export async function GET(request: Request) {
     await connectToDatabase()
     const { searchParams } = new URL(request.url);
-    const publicKey = searchParams.get('receiver');
+    const publicKey = searchParams.get('reciver');
     // const publicKey = request.json()
     if (publicKey) {
         try {

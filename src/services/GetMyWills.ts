@@ -10,7 +10,7 @@ const GetWill = async (key: string, type: MyWills): Promise<any> => {
     if (type == MyWills.Creator) {
         url = `/api/getsenderwill?sender=${key}`
     } else {
-        url = `/api/getsenderwill?receiver=${key}`
+        url = `/api/getsenderwill?reciver=${key}`
     }
 
     return axios.get(url)

@@ -5,13 +5,11 @@ export async function DELETE(request: Request) {
     await connectToDatabase();
 
     const { searchParams } = new URL(request.url);
-    const reciver = searchParams.get('receiver');
+    const reciver = searchParams.get('reciver');
     const sender = searchParams.get('sender');
 
     if (sender && reciver) {
         try {
-
-
             const result = await WillModal.findOneAndDelete({ sender, reciver });
 
             if (!result) {
@@ -22,7 +20,6 @@ export async function DELETE(request: Request) {
                     status: 404,
                 });
             }
-
             return new Response(JSON.stringify({ success: true, message: "Will deleted successfully." }), {
                 status: 200,
             });
