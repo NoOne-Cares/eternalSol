@@ -1,4 +1,4 @@
-import mongoose, { Document, NumberExpression, Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface Will extends Document {
     message: string;

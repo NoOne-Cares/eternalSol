@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONOGODB_URL!
+const MONGODB_URI = process.env.NEXT_PUBLIC_MONOGODB_URL!
 
 if (!MONGODB_URI) {
     throw new Error("Mongo DB uri missing")

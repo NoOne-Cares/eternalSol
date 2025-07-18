@@ -1,7 +1,11 @@
 import { connectToDatabase } from "@/lib/db";
 import WillModal from "@/models/will";
 
-export async function POST(request: Request) {
+export async function GET() {
+    return new Response("GET request is working", { status: 200 });
+}
+
+export async function PUT(request: Request) {
     await connectToDatabase();
 
     try {
@@ -12,11 +16,11 @@ export async function POST(request: Request) {
         if (existingWill) {
             return new Response(JSON.stringify({
                 success: false,
-                message: "You can't create two will from same public address"
+                message: "You can't create will for same reciver address"
             }), { status: 409 });
         }
 
-        const createdAt = Math.floor(Date.now() / 1000);
+        // const createdAt = Math.floor(Date.now() / 1000);
 
         const newWill = new WillModal({
             message,
@@ -25,7 +29,6 @@ export async function POST(request: Request) {
             duration,
             transaction,
             amount,
-            createdAt,
         });
 
         await newWill.save();

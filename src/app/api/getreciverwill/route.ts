@@ -3,9 +3,10 @@ import { connectToDatabase } from '@/lib/db'
 import WillModal from '@/models/will'
 export async function GET(request: Request) {
     await connectToDatabase()
-    const publicKey = request.json()
-    try {
-        new PublicKey(publicKey);
+    const { searchParams } = new URL(request.url);
+    const publicKey = searchParams.get('receiver');
+    // const publicKey = request.json()
+    if (publicKey) {
         try {
             const wills = WillModal.find({ reciver: publicKey }, 'message reciver sender amount -_id')
             return new Response(JSON.stringify(wills), {
@@ -20,11 +21,13 @@ export async function GET(request: Request) {
                     status: 500
                 })
         }
-    } catch (error) {
-        console.log("no valid key found")
+    } else {
         return Response.json({
             success: false,
-            message: "No valid keey found"
-        })
+            message: "pleasee connect your Wallet"
+        },
+            {
+                status: 500
+            })
     }
 }

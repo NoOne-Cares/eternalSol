@@ -9,6 +9,8 @@ import { signTransactionWithNonce } from '@/lib/signWithNonce';
 import { useAtom } from 'jotai';
 import { oracleConnection, walletPublicKey } from '@/store/jotaiStore';
 import { encrypt } from '@/lib/encription';
+import { useMutation } from '@tanstack/react-query';
+import { CreateWill } from '../../services/CreateWill';
 
 
 
@@ -25,7 +27,33 @@ const WillCreateForm = () => {
     const secretKey = Uint8Array.from(Buffer.from(nonceKeypairAuth, 'base64'))
     const authKeypair = Keypair.fromSecretKey(secretKey)
 
+    // adjust path
 
+    const createWillMutation = useMutation({
+        mutationFn: ({
+            message,
+            sender,
+            receiver,
+            duration,
+            transaction,
+            amount,
+        }: {
+            message: string;
+            sender: string;
+            receiver: string;
+            duration: number;
+            transaction: string;
+            amount: number;
+        }) => CreateWill(message, sender, receiver, duration, transaction, amount),
+        onSuccess: (data) => {
+            console.log('✅ Will created successfully:', data);
+            alert('✅ Will created successfully');
+        },
+        onError: (error) => {
+            console.error('❌ Error creating will:', error);
+            alert('❌ Failed to create will');
+        },
+    });
     // console.log('🔑 Loaded Keypair Public Key:', authKeypair.publicKey.toBase58())
 
 
@@ -151,11 +179,22 @@ const WillCreateForm = () => {
 
         const hasedKey = await handleCreateNonce(new PublicKey(formData.receiver), parseInt(formData.amount))
         if (hasedKey) {
-
+            try {
+                await createWillMutation.mutateAsync({
+                    message,
+                    sender: publicKey!.toBase58(),
+                    receiver,
+                    duration: totalDurationInSeconds,
+                    transaction: hasedKey,
+                    amount: parseFloat(amount),
+                });
+            } catch (err) {
+                console.error("Mutation error:", err);
+            }
         } else {
-
+            alert("❌ Signing failed. Cannot create will.");
         }
-        setIsSubmitting(false)
+        setIsSubmitting(false);
     }
 
 
