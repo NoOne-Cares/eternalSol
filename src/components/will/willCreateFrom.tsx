@@ -97,15 +97,17 @@ const WillCreateForm = () => {
                     publicKey,
                     authKeypair,
                     amount,
-                    signTransaction: wallet.signTransaction
+                    signTransaction: signTransaction
                 });
 
             }
             console.log("Signed TX (base64):", txSignedByNonce);
-            console.log(typeof txSignedByNonce)
+            console.log("signed trx" + " " + txSignedByNonce)
             // alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
-            setSignedTxBase64(txSignedByNonce)
+            // setSignedTxBase64(txSignedByNonce)
             const hashedSignature = encrypt(txSignedByNonce)
+            console.log("encrtypt tx:" + " " + hashedSignature)
+            // return hashedSignature
             return hashedSignature
         } catch (error: any) {
             return null

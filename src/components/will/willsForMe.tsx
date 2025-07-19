@@ -7,6 +7,7 @@ import { oracleConnection, walletPublicKey } from '@/store/jotaiStore'
 import { GetWillsRecivedByMe } from '@/services/GetMyWills'
 import { getWillToBeClaimed, WillResponse, TimeDiffResponse } from '@/services/ClaimWill'
 import { sendStoredTransaction } from '@/lib/sendTranjaction'
+import { decrypt } from '@/lib/encription'
 
 const WillsForMe = () => {
     const [publicKey] = useAtom(walletPublicKey)
@@ -47,9 +48,10 @@ const WillsForMe = () => {
 
             if ('transaction' in result && result.transaction && connection) {
                 console.log(result.transaction)
+                const tx = decrypt(result.transaction)
                 const signature = await sendStoredTransaction({
                     connection,
-                    serializedTxBase64: "U2FsdGVkX1+Vhghah6g0CcfIDquvQEnEeML6LiusqawbeswYuv5BDaKc2wO9qalgXMf4/aS+he1hfMRJwcNIWwGnd3PI2UkN3BuOjf4RXO982FF9r7qG/wWt9VrKWgdOvkO6UbEmOicoIORT2tqhb1gQnyjVTI/q9qVULYo1vlGQfaHSY3NqqyvoOF8NeUYQASNYJy+qRW2RuM+rA1TfFgSLEJ1As84oUhw5rF1Hm3Nb9LHw5Eza1WN+TheaYnO/ZFfwTvE9rBycuwZAYTviCgPiUMdJnbLeLNHNNPAF1QKH+HesCVCp+DSWX3kacnS7efo9XbiZySM9GqCgqFFyGJerPtFUZOdYw/SUwF8E1FjzI+CLGkD0qgUV7oIFlpuNcH0OK5PjbUNF2Pk6QKCtVk6b7aICP2h+/ADNsxSBR33SJxpgYTJ03c+cQlPiEzSZEtT9ohdW+SUKklPcnUYUqwXDCwIah+1/ombWDf8Sh//vzebtQm0DG3SND4TfhJau4155p9jyleOxlB75+JGXZDHO8LjRE7a6IM5ohvGJ/8FKj/+UE8C8SKlJ2rDx8eEuiX0UHpALqrQ1YlpOr0DPdZR1bWf3HoZeGatsJVBA/U2RbY73i+Q60iDxxhq9Zd4mRgALF4hHZy35SChGoLZIPplBOAbBf+E3LlOppIuMv/lNTW/ZptVs8PuA6yuEFhGNcBSizT6/OQ4hf9H+mVy9qEzRkeHeguqJ4y+Mkl4zf3AIKtuYMdj35VJBj6v9KDaLOBTf2wKQU0El65WNV5p33oLrBCULMzW5UzF9y+0qPLw=",
+                    serializedTxBase64: tx,
                 })
 
                 setClaimResult(prev => ({
