@@ -16,6 +16,7 @@ import { CanCreateWill } from '@/services/CanCreateWill';
 
 
 const WillCreateForm = () => {
+    const wallet = useWallet()
     const [signedTxBase64, setSignedTxBase64] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [publicKey] = useAtom(walletPublicKey)
@@ -48,7 +49,7 @@ const WillCreateForm = () => {
         }) => CreateWill(message, sender, receiver, duration, transaction, amount),
         onSuccess: (data) => {
             console.log('✅ Will created successfully:', data);
-            alert('✅ Will created successfully');
+            // alert('✅ Will created successfully');
         },
         onError: (error) => {
             console.error('❌ Error creating will:', error);
@@ -60,11 +61,6 @@ const WillCreateForm = () => {
         mutationFn: ({ sender, receiver }: { sender: string; receiver: string }) =>
             CanCreateWill(sender, receiver),
     });
-    // console.log('🔑 Loaded Keypair Public Key:', authKeypair.publicKey.toBase58())
-
-
-    // const base58String = 'AwZF8bvPojfNbZN8SrUN8bzbDH3evZv3hRcvy85zUNeQ'
-    // const recipient = new PublicKey(base58String)
 
     const handleCreateNonce = useCallback(async (recipient: PublicKey, amount: number) => {
         if (!publicKey) return alert('❌ Wallet not connected')
@@ -82,7 +78,8 @@ const WillCreateForm = () => {
         }
         console.log(sig)
         if (sig != "fall to create will") {
-            alert(`✅ Durable Nonce Account Created!\nSignature: ${sig}`)
+            // throw new Error("Noce account creation failed")
+            console.log("nonce created successfully")
         } else {
             alert('❌ Failed to create nonce account')
             throw new Error("fail to create nonce")
@@ -90,6 +87,7 @@ const WillCreateForm = () => {
         const noncePubkey = nonceKeypair.publicKey;
         let txSignedByNonce = ""
         try {
+
             if (connection && publicKey) {
                 alert(`✅ Durable Nonce Account Created!\nSignature: ${connection}`)
                 txSignedByNonce = await signTransactionWithNonce({
@@ -99,13 +97,13 @@ const WillCreateForm = () => {
                     publicKey,
                     authKeypair,
                     amount,
-                    signTransaction
+                    signTransaction: wallet.signTransaction
                 });
 
             }
             console.log("Signed TX (base64):", txSignedByNonce);
             console.log(typeof txSignedByNonce)
-            alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
+            // alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
             setSignedTxBase64(txSignedByNonce)
             const hashedSignature = encrypt(txSignedByNonce)
             return hashedSignature
@@ -167,15 +165,6 @@ const WillCreateForm = () => {
             (parseInt(hours) || 0) * 60 * 60 +
             (parseInt(minutes) || 0) * 60 +
             (parseInt(seconds) || 0);
-
-        const payload = {
-            message,
-            publicKey,
-            receiver,
-            amount: parseFloat(amount),
-            totalDurationInSeconds,
-        };
-
 
 
         if (!isValidSolanaAddress(formData.receiver)) {

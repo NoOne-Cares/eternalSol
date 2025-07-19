@@ -9,6 +9,7 @@ import {
     VersionedTransaction,
 } from '@solana/web3.js';
 
+
 export async function signTransactionWithNonce({
     connection,
     noncePubkey,
@@ -55,8 +56,8 @@ export async function signTransactionWithNonce({
             })
         );
 
-        tx.partialSign(authKeypair);
 
+        tx.partialSign(authKeypair);
         const signedTx = await signTransaction(tx);
         const serializedTx = signedTx.serialize().toString('base64');
 

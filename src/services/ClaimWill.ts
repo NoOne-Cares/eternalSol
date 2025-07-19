@@ -1,17 +1,38 @@
 
-import axios from "axios";
+import axios from 'axios';
 
-
-export const ClaimWill = async (sender: string, reciver: string): Promise<any> => {
-    console.log(reciver)
-    return axios.get(`/api/claimwill?sender=${sender}&reciver=${reciver}`)
-
-        .then(res => {
-            console.log(reciver)
-            return res.data
-        })
-        .catch(err => {
-            console.log(reciver)
-            throw err
-        })
+export interface WillResponse {
+    _id?: string;
+    sender?: string;
+    reciver?: string;
+    message?: string;
+    transaction?: string;
+    amount?: number;
+    duration?: number;
 }
+
+export interface TimeDiffResponse {
+    timeDiff: number;
+}
+
+export const getWillToBeClaimed = async (
+    sender: string,
+    reciver: string
+): Promise<WillResponse | TimeDiffResponse> => {
+    console.log("stem 1")
+    const url = `/api/claimwill?sender=${sender}&reciver=${reciver}`;
+    console.log("this is working")
+    try {
+        const response = await axios.get(url, { validateStatus: () => true });
+
+        if (response.status === 200) {
+            return response.data as WillResponse;
+        } else if (response.status === 201) {
+            return { timeDiff: response.data };
+        } else {
+            throw new Error(response.data?.message || 'Unknown error');
+        }
+    } catch (error) {
+        throw error;
+    }
+};

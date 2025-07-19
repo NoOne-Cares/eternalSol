@@ -20,12 +20,13 @@ export async function GET(request: Request) {
 
                 const signatures = await connection.getSignaturesForAddress(publicKey, { limit: 1 });
                 if (signatures.length === 0) {
+                    console.log(signatures.length)
                     return Response.json({
                         success: false,
                         message: "Something went worng with the cluster connection"
                     },
                         {
-                            status: 500
+                            status: 501
                         })
                 }
 
@@ -43,14 +44,16 @@ export async function GET(request: Request) {
                 }
 
                 const currentTime = Math.floor(Date.now() / 1000)
-                if (currentTime - blockTime < duration) {
+                if (currentTime - blockTime >= duration) {
+                    // ✅ Will is claimable
                     return new Response(JSON.stringify(willToBeClaimed), {
                         status: 200,
                     });
                 } else {
-                    return new Response(JSON.stringify(currentTime - blockTime)), {
-                        status: 201
-                    }
+                    const timeDiff = duration - (currentTime - blockTime)
+                    return new Response(JSON.stringify(timeDiff), {
+                        status: 201,
+                    });
                 }
 
             }
