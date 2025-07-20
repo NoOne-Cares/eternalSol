@@ -12,7 +12,8 @@ import { encrypt } from '@/lib/encription';
 import { useMutation } from '@tanstack/react-query';
 import { CreateWill } from '../../services/CreateWill';
 import { CanCreateWill } from '@/services/CanCreateWill';
-
+import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 const WillCreateForm = () => {
@@ -22,6 +23,7 @@ const WillCreateForm = () => {
     const [publicKey] = useAtom(walletPublicKey)
     const [connection] = useAtom(oracleConnection)
     const { signTransaction } = useWallet()
+    const queryClient = useQueryClient()
 
     const [NonceKeypair, setNonceKeyPair] = useState(() => Keypair.generate())
     const nonceKeypairAuth = process.env.NEXT_PUBLIC_SOLANA_SECRET_KEY
@@ -47,13 +49,11 @@ const WillCreateForm = () => {
             transaction: string;
             amount: number;
         }) => CreateWill(message, sender, receiver, duration, transaction, amount),
-        onSuccess: (data) => {
-            console.log('✅ Will created successfully:', data);
-            // alert('✅ Will created successfully');
-        },
         onError: (error) => {
-            console.error('❌ Error creating will:', error);
-            alert('❌ Failed to create will');
+            const notify = () => toast.error(error.toString, {
+                autoClose: 5000,
+            });
+            notify()
         },
     });
 
@@ -63,10 +63,17 @@ const WillCreateForm = () => {
     });
 
     const handleCreateNonce = useCallback(async (recipient: PublicKey, amount: number) => {
-        if (!publicKey) return alert('❌ Wallet not connected')
+        if (!publicKey) {
+            const notify = () => toast.error("Please connect you wallet", {
+                autoClose: 5000,
+            });
+            notify()
+
+            return
+        }
         const nonceKeypair = Keypair.generate();
         setNonceKeyPair(nonceKeypair);
-        console.log(NonceKeypair + " " + "this is new" + nonceKeypair)
+
 
         let sig = ""
         if (connection) {
@@ -76,20 +83,18 @@ const WillCreateForm = () => {
                 authKeypair
             });
         }
-        console.log(sig)
-        if (sig != "fall to create will") {
-            // throw new Error("Noce account creation failed")
-            console.log("nonce created successfully")
-        } else {
-            alert('❌ Failed to create nonce account')
-            throw new Error("fail to create nonce")
+        if (sig === "fall to create will") {
+            const notify = () => toast.error("Something went wrong", {
+                autoClose: 5000,
+            });
+            notify()
+            return
         }
         const noncePubkey = nonceKeypair.publicKey;
         let txSignedByNonce = ""
         try {
 
             if (connection && publicKey) {
-                alert(`✅ Durable Nonce Account Created!\nSignature: ${connection}`)
                 txSignedByNonce = await signTransactionWithNonce({
                     connection,
                     noncePubkey,
@@ -101,16 +106,11 @@ const WillCreateForm = () => {
                 });
 
             }
-            console.log("Signed TX (base64):", txSignedByNonce);
-            console.log("signed trx" + " " + txSignedByNonce)
-            // alert(`✅ Durable Nonce Account Created!\nSignature: ${txSignedByNonce}`)
-            // setSignedTxBase64(txSignedByNonce)
             const hashedSignature = encrypt(txSignedByNonce)
             console.log("encrtypt tx:" + " " + hashedSignature)
-            // return hashedSignature
             return hashedSignature
         } catch (error: any) {
-            return null
+            throw error
         }
     }, [connection, nonceKeypairAuth])
 
@@ -177,27 +177,31 @@ const WillCreateForm = () => {
         try {
             const senderAddress = publicKey!.toBase58();
 
-            // ✅ Step 1: Call canCreateWill
             const canCreate = await canCreateWillMutation.mutateAsync({
                 sender: senderAddress,
                 receiver,
             });
 
             if (!canCreate.success) {
-                alert('❌ You are not allowed to create a will with this receiver.');
+                const notify = () => toast.error("You can create two wills with same reciver address", {
+                    autoClose: 5000,
+                });
+                notify()
                 setIsSubmitting(false);
                 return;
             }
 
-            // ✅ Step 2: Sign with nonce
+
             const hashedTx = await handleCreateNonce(new PublicKey(receiver), parseFloat(amount));
             if (!hashedTx) {
-                alert("❌ Signing failed. Cannot create will.");
+                const notify = () => toast.error("Something went wrong while creating will", {
+                    autoClose: 5000,
+                });
+                notify()
                 setIsSubmitting(false);
                 return;
             }
 
-            // ✅ Step 3: Now call createWill
             await createWillMutation.mutateAsync({
                 message,
                 sender: senderAddress,
@@ -206,20 +210,22 @@ const WillCreateForm = () => {
                 transaction: hashedTx,
                 amount: parseFloat(amount),
             });
+            await queryClient.invalidateQueries(['wills-created', publicKey])
+            const notify = () => toast.success("Will created successfully", {
+                autoClose: 5000,
+            });
+            notify()
 
-        } catch (err) {
-            console.error("❌ Error submitting will form:", err);
-            alert("❌ Something went wrong while creating the will.");
+        } catch (err: any) {
+            const notify = () => toast.error(err.toString(), {
+                autoClose: 5000,
+            });
+            notify()
         }
 
         setIsSubmitting(false);
     }
 
-
-
-
-
-    // console.log('Will Payload:', payload);
 
     return (
         <div className="relative max-w-2xl mx-auto px-6 py-12 bg-card text-card-foreground rounded-lg shadow-md">

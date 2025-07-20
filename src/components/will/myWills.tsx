@@ -29,7 +29,6 @@ const MyWills = () => {
             setDeletingId(willId)
             await DeleteWill(sender, reciver)
             queryClient.invalidateQueries(['wills-created', publicKey])
-            // alert('Will deleted successfully.')
         } catch (error) {
             console.error('Failed to delete will:', error)
             alert('Failed to delete will.')

@@ -19,9 +19,7 @@ export const getWillToBeClaimed = async (
     sender: string,
     reciver: string
 ): Promise<WillResponse | TimeDiffResponse> => {
-    console.log("stem 1")
     const url = `/api/claimwill?sender=${sender}&reciver=${reciver}`;
-    console.log("this is working")
     try {
         const response = await axios.get(url, { validateStatus: () => true });
 

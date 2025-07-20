@@ -12,7 +12,6 @@ import { Provider } from 'jotai'
 const links: { label: string; path: string }[] = [
   // More links...
   { label: 'Account', path: '/account' },
-  { label: 'Durable', path: '/durable' },
   { label: 'Wills', path: '/wills' },
 ]
 

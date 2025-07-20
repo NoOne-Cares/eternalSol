@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     // const publicKey = request.json()
     if (publicKey) {
         try {
-            const wills = await WillModal.find({ reciver: publicKey }, 'message reciver sender amount -_id')
+            const wills = await WillModal.find({ reciver: publicKey }, 'message reciver sender amount _id')
             return new Response(JSON.stringify(wills), {
                 status: 201,
             });

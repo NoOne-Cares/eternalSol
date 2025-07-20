@@ -9,7 +9,6 @@ export const CreateWill = async (message: string,
 
     return axios.put("/api/createwill", { message, sender, reciver, duration, transaction, amount })
         .then(res => {
-            console.log(res.data);
             return res.data;
         })
         .catch(err => {

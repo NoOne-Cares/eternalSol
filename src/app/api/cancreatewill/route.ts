@@ -7,8 +7,6 @@ export async function GET(request: Request) {
     const reciver = searchParams.get('reciver');
 
     const sender = searchParams.get('sender');
-    console.log(sender)
-    console.log(reciver)
     if (!sender || !reciver) {
         return new Response(JSON.stringify({
             success: false,
