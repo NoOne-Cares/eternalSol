@@ -1,88 +1,73 @@
-# legacy-next-tailwind-counter
+# 🪙 EternalSOL –  Will Creation on Solana
 
-This is a Next.js app containing:
+EternalSOL is a platform that allows users to create secure wills. These wills are claimable by recipients after a set period of user inactivity, offering protection for your assets in cases of lost private keys, death, or prolonged absence.
 
-- Tailwind CSS setup for styling
-- Useful wallet UI elements setup using [@solana/web3.js](https://www.npmjs.com/package/@solana/web3.js)
-- A basic Counter Solana program written in Anchor
-- UI components for interacting with the Counter program
+Built with **Next.js**, **Turborepo**, **Tailwind CSS**, and **TypeScript**, the app is optimised for performance, developer experience, and scalability.
 
-## Getting Started
+---
 
-### Installation
+## ⚙️ Tech Stack
 
-#### Download the template
+- [Next.js](https://nextjs.org/)
+- [Turborepo](https://turbo.build/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Jotai](https://jotai.org/) for state management
+- [@tanstack/react-query](https://tanstack.com/query) for data fetching
+- Solana Web3 SDK & durable nonce mechanism
+- Toastify for notifications
 
-```shell
-pnpm create solana-dapp@latest -t gh:solana-developers/solana-templates/legacy/legacy-next-tailwind-counter
-```
+---
 
-#### Install Dependencies
+## 🚀 Features
 
-```shell
-pnpm install
-```
+- 🔐 **Create on-chain wills** tied to your wallet
+- ⏳ **Claim mechanism** based on user inactivity
+- 🧠 **No escrow** – funds remain fully accessible to users until claimed
+- 💼 **Supports major Solana wallets**
 
-## Apps
+---
 
-### anchor
+## 🛠️ Setup Instructions
 
-This is a Solana program written in Rust using the Anchor framework.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/NoOne-Cares/eternalSol.git
+   cd cryptowill
+   ```
 
-#### Commands
+2. **Install dependencies using Turborepo**
+   ```bash
+   pnpm install
+   ```
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the
-command with `pnpm`, eg: `pnpm anchor`.
+3. **Start the development server**
+   ```bash
+   pnpm dev
+   ```
 
-#### Sync the program id:
+4. **Build the project**
+   ```bash
+   pnpm build
+   ```
 
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the
-Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
+---
 
-You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
+## ⚠️ Known Issue
 
-```shell
-pnpm anchor keys sync
-```
+> ❗ **Phantom Wallet Compatibility**  
+CryptoWill currently **does not work with the Phantom wallet** due to a signing issue related to durable nonce transactions. We're actively working on a fix.  
+In the meantime, please use other supported Solana wallets like **Solflare**, **Backpack**, or **Glow** for a smooth experience.
 
-#### Build the program:
+---
 
-```shell
-pnpm anchor-build
-```
 
-#### Start the test validator with the program deployed:
+## ✅ To-Do
 
-```shell
-pnpm anchor-localnet
-```
+- [ ] Fix Phantom wallet bug
+- [ ] Add multisig support
+- [ ] Enable off-chain backup of will metadata
+- [ ] Improve claim validation logic
+- [ ] UI/UX polish and accessibility testing
 
-#### Run the tests
 
-```shell
-pnpm anchor-test
-```
-
-#### Deploy to Devnet
-
-```shell
-pnpm anchor deploy --provider.cluster devnet
-```
-
-### web
-
-This is a React app that uses the Anchor generated client to interact with the Solana program.
-
-#### Commands
-
-Start the web app
-
-```shell
-pnpm dev
-```
-
-Build the web app
-
-```shell
-pnpm build
-```
