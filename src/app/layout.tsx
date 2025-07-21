@@ -3,11 +3,12 @@ import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
 import React from 'react'
 import { Provider } from 'jotai'
+import { Metadata } from 'next'
 
-// export const metadata: Metadata = {
-//   title: 'EternalSOL',
-//   description: 'a plafrom to create will for solana',
-// }
+export const metadata: Metadata = {
+  title: 'EternalSOL',
+  description: 'A plafrom to create will for solana',
+}
 
 const links: { label: string; path: string }[] = [
   // More links...
