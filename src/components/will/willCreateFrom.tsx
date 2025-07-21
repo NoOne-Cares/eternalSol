@@ -201,7 +201,11 @@ const WillCreateForm = () => {
                 transaction: hashedTx,
                 amount: parseFloat(amount),
             });
-            await queryClient.invalidateQueries(['wills-created', publicKey])
+            if (publicKey) {
+                queryClient.invalidateQueries({
+                    queryKey: ['wills-created', publicKey.toBase58()],
+                });
+            }
             const notify = () => toast.success("Will created successfully", {
                 autoClose: 5000,
             });

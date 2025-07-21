@@ -5,7 +5,7 @@ enum MyWills {
     Receiver = "receiver",
 }
 
-interface Will {
+export interface Will {
     _id?: string;
     message?: string;
     sender?: string;
@@ -13,7 +13,7 @@ interface Will {
     amount?: number;
 }
 
-interface GetWillResponse {
+export interface GetWillResponse {
     success: boolean;
     wills: Will[];
 }

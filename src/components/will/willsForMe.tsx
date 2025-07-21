@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useAtom } from 'jotai'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { oracleConnection, walletPublicKey } from '@/store/jotaiStore'
-import { GetWillsRecivedByMe } from '@/services/GetMyWills'
+import { GetWillResponse, GetWillsRecivedByMe } from '@/services/GetMyWills'
 import { getWillToBeClaimed, WillResponse, TimeDiffResponse } from '@/services/ClaimWill'
 import { sendStoredTransaction } from '@/lib/sendTranjaction'
 import { decrypt } from '@/lib/encription'
@@ -28,10 +28,10 @@ const WillsForMe = () => {
     const queryClient = useQueryClient()
 
     const {
-        data: receivedData = [],
+        data: receivedData,
         isLoading,
         error,
-    } = useQuery({
+    } = useQuery<GetWillResponse>({
         queryKey: ['received-wills', publicKey?.toBase58()],
         queryFn: () => GetWillsRecivedByMe(publicKey!.toBase58()),
         enabled: !!publicKey,
@@ -68,7 +68,11 @@ const WillsForMe = () => {
                 setTimeout(async () => {
                     try {
                         await DeleteWill(sender, publicKey.toBase58())
-                        queryClient.invalidateQueries(['received-wills', publicKey.toBase58()])
+                        if (publicKey) {
+                            queryClient.invalidateQueries({
+                                queryKey: ['wills-created', publicKey.toBase58()],
+                            });
+                        }
                     } catch (error) {
                         throw error
                     }
