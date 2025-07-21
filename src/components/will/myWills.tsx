@@ -16,12 +16,12 @@ const MyWills = () => {
         data: createdWills,
         isLoading: isLoadingCreated,
         error: errorCreated,
-    } = useQuery({
+    } = useQuery<Will[]>({
         queryKey: ['wills-created', publicKey],
         queryFn: () => GetWillsCreatedByMe(publicKey!.toBase58()),
         enabled: !!publicKey,
     })
-    const wills = createdWills?.wills ?? []
+
 
     const handleDelete = async (sender: string, reciver: string, willId: string) => {
         if (!window.confirm('Are you sure you want to delete this will?')) return
@@ -59,12 +59,12 @@ const MyWills = () => {
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">
             <div>
-                <h2 className="text-xl font-semibold mb-3">📜 Wills Created by Me</h2>
-                {wills?.length === 0 ? (
+                <h2 className="text-xl font-semibold mb-3">Wills Created by Me</h2>
+                {createdWills?.length === 0 ? (
                     <p className="text-sm text-gray-500">You haven’t created any wills yet.</p>
                 ) : (
                     <ul className="space-y-3">
-                        {wills.map((will: Will) => (
+                        {createdWills?.map((will: Will) => (
                             <li key={will._id} className="border p-4 rounded-md flex justify-between items-center">
                                 <div>
                                     <p><strong>To:</strong> {will.reciver}</p>

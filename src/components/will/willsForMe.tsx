@@ -4,21 +4,13 @@ import React, { useState } from 'react'
 import { useAtom } from 'jotai'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { oracleConnection, walletPublicKey } from '@/store/jotaiStore'
-import { GetWillResponse, GetWillsRecivedByMe } from '@/services/GetMyWills'
+import { GetWillsRecivedByMe, Will } from '@/services/GetMyWills'
 import { getWillToBeClaimed, WillResponse, TimeDiffResponse } from '@/services/ClaimWill'
 import { sendStoredTransaction } from '@/lib/sendTranjaction'
 import { decrypt } from '@/lib/encription'
 import { toast } from 'react-toastify'
 import { DeleteWill } from '@/services/DeleteWill'
 
-type ReceivedWill = {
-    _id?: string
-    message?: string
-    sender?: string
-    reciver?: string
-    duration?: number
-    amount?: number
-}
 
 const WillsForMe = () => {
     const [publicKey] = useAtom(walletPublicKey)
@@ -28,15 +20,15 @@ const WillsForMe = () => {
     const queryClient = useQueryClient()
 
     const {
-        data: receivedData,
+        data: receivedWills,
         isLoading,
         error,
-    } = useQuery<GetWillResponse>({
+    } = useQuery<Will[]>({
         queryKey: ['received-wills', publicKey?.toBase58()],
         queryFn: () => GetWillsRecivedByMe(publicKey!.toBase58()),
         enabled: !!publicKey,
     })
-    const receivedWills: ReceivedWill[] = receivedData?.wills ?? [];
+
 
 
 
@@ -98,7 +90,7 @@ const WillsForMe = () => {
     }
 
     if (!publicKey) {
-        return <div className="text-center mt-6">🔌 Please connect your wallet.</div>
+        return <div className="text-center mt-6"> Please connect your wallet.</div>
     }
 
     if (isLoading) {
@@ -106,18 +98,18 @@ const WillsForMe = () => {
     }
 
     if (error) {
-        return <div className="text-red-600 mt-6 text-center">❌ Error: {error.message}</div>
+        return <div className="text-red-600 mt-6 text-center"> Error: {error.message}</div>
     }
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">
-            <h2 className="text-xl font-semibold"> Wills For You</h2>
+            <h2 className="text-xl font-semibold"> Wills Recived By Me</h2>
 
-            {receivedWills.length === 0 ? (
+            {receivedWills?.length === 0 ? (
                 <p className="text-gray-500">You haven’t received any wills yet.</p>
             ) : (
                 <ul className="space-y-3">
-                    {receivedWills.map((will: ReceivedWill) => {
+                    {receivedWills?.map((will: Will) => {
                         const id = will._id
 
                         const result = claimResult[id!]
@@ -148,10 +140,9 @@ const WillsForMe = () => {
                                         ) : null}
                                     </div>
                                 )}
-                                {claimResult[will._id!] && (
+                                {claimResult[will._id!] && 'transaction' in claimResult[will._id!] && (
                                     <div>
-
-                                        <p className="text-green-400"> successfully claimed you will</p>
+                                        <p className="text-green-400">Successfully claimed your will</p>
                                     </div>
                                 )}
                             </li>

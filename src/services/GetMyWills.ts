@@ -13,12 +13,12 @@ export interface Will {
     amount?: number;
 }
 
-export interface GetWillResponse {
-    success: boolean;
-    wills: Will[];
-}
+// export interface GetWillResponse {
+//     success: boolean;
+//     wills: Will[];
+// }
 
-const GetWill = async (key: string, type: MyWills): Promise<GetWillResponse> => {
+const GetWill = async (key: string, type: MyWills): Promise<Will[]> => {
     let url = ""
     if (type == MyWills.Creator) {
         url = `/api/getsenderwill?sender=${key}`
