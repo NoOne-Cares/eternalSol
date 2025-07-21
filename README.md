@@ -1,4 +1,4 @@
-# 🪙 EternalSOL –  Will Creation on Solana
+#  EternalSOL –  Will Creation on Solana
 
 EternalSOL is a platform that allows users to create secure wills. These wills are claimable by recipients after a set period of user inactivity, offering protection for your assets in cases of lost private keys, death, or prolonged absence.
 
@@ -6,7 +6,7 @@ Built with **Next.js**, **Turborepo**, **Tailwind CSS**, and **TypeScript**, the
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 - [Next.js](https://nextjs.org/)
 - [Turborepo](https://turbo.build/)
@@ -19,7 +19,7 @@ Built with **Next.js**, **Turborepo**, **Tailwind CSS**, and **TypeScript**, the
 
 ---
 
-## 🚀 Features
+## Features
 
 - 🔐 **Create on-chain wills** tied to your wallet
 - ⏳ **Claim mechanism** based on user inactivity
@@ -28,7 +28,7 @@ Built with **Next.js**, **Turborepo**, **Tailwind CSS**, and **TypeScript**, the
 
 ---
 
-## 🛠️ Setup Instructions
+##  Setup Instructions
 
 1. **Clone the repository**
    ```bash
@@ -53,7 +53,7 @@ Built with **Next.js**, **Turborepo**, **Tailwind CSS**, and **TypeScript**, the
 
 ---
 
-## ⚠️ Known Issue
+##  Known Issue
 
 > ❗ **Phantom Wallet Compatibility**  
 CryptoWill currently **does not work with the Phantom wallet** due to a signing issue related to durable nonce transactions. We're actively working on a fix.  
