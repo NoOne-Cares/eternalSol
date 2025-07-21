@@ -20,7 +20,7 @@ const WillCreateForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [publicKey] = useAtom(walletPublicKey)
     const [connection] = useAtom(oracleConnection)
-    const { signTransaction, wallet } = useWallet()
+    const { signTransaction } = useWallet()
     const queryClient = useQueryClient()
 
     const [, setNonceKeyPair] = useState(() => Keypair.generate())
