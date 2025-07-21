@@ -6,7 +6,6 @@ if (!MONGODB_URI) {
     throw new Error("Mongo DB uri missing")
 }
 
-
 let cache = global.mongoose;
 
 if (!cache) {
@@ -14,7 +13,7 @@ if (!cache) {
 }
 
 export const connectToDatabase = async () => {
-    if (cache.con) cache.con;
+    if (cache.con) return cache.con
     if (!cache.promise) {
         mongoose
             .connect(MONGODB_URI)
@@ -24,7 +23,7 @@ export const connectToDatabase = async () => {
         cache.con = await cache.promise
     } catch (error) {
         cache.promise = null
-        throw new Error("Connection Failled")
+        throw error
     }
-    return cache.con;
+    return cache.con
 }

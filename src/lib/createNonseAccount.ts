@@ -39,7 +39,7 @@ export async function createNonceAccount({
         const sig = await sendAndConfirmRawTransaction(connection, tx.serialize())
         return sig
     } catch (error) {
-        return "fall to create will"
+        throw error
     }
 
 

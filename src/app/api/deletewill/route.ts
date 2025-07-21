@@ -24,7 +24,7 @@ export async function DELETE(request: Request) {
                 status: 200,
             });
         } catch (error) {
-            return new Response(JSON.stringify({ success: false, message: "Failed to delete will" }), {
+            return new Response(JSON.stringify({ success: false, message: error }), {
                 status: 500,
             });
         }

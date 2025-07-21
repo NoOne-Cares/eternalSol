@@ -33,7 +33,7 @@ export function AppLayout({
       setWalletPublicKey(null);
       setOraclePublicKey(null)
     }
-  }, [connected, publicKey, connection]);
+  }, [connected, publicKey, connection, setOraclePublicKey, setWalletPublicKey]);
 
 
   return (

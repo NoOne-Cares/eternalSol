@@ -6,6 +6,7 @@ import { GetWillsCreatedByMe } from '../../services/GetMyWills' // Adjust path
 import { DeleteWill } from '../../services/DeleteWill' // Import your delete function
 import { useAtom } from 'jotai'
 import { walletPublicKey } from '@/store/jotaiStore'
+import { MyWill } from '@/types'
 
 const MyWills = () => {
     const [publicKey] = useAtom(walletPublicKey)
@@ -59,7 +60,7 @@ const MyWills = () => {
                     <p className="text-sm text-gray-500">You haven’t created any wills yet.</p>
                 ) : (
                     <ul className="space-y-3">
-                        {createdWills.map((will: any) => (
+                        {createdWills.map((will: MyWill) => (
                             <li key={will._id} className="border p-4 rounded-md flex justify-between items-center">
                                 <div>
                                     <p><strong>To:</strong> {will.reciver}</p>

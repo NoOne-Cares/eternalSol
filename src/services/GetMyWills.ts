@@ -5,7 +5,20 @@ enum MyWills {
     Receiver = "receiver",
 }
 
-const GetWill = async (key: string, type: MyWills): Promise<any> => {
+interface Will {
+    _id?: string;
+    message?: string;
+    sender?: string;
+    reciver?: string;
+    amount?: number;
+}
+
+interface GetWillResponse {
+    success: boolean;
+    wills: Will[];
+}
+
+const GetWill = async (key: string, type: MyWills): Promise<GetWillResponse> => {
     let url = ""
     if (type == MyWills.Creator) {
         url = `/api/getsenderwill?sender=${key}`

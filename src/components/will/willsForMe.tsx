@@ -17,7 +17,6 @@ type ReceivedWill = {
     sender?: string
     reciver?: string
     duration?: number
-    transaction?: string
     amount?: number
 }
 
@@ -29,7 +28,7 @@ const WillsForMe = () => {
     const queryClient = useQueryClient()
 
     const {
-        data: receivedWills = [],
+        data: receivedData = [],
         isLoading,
         error,
     } = useQuery({
@@ -37,6 +36,7 @@ const WillsForMe = () => {
         queryFn: () => GetWillsRecivedByMe(publicKey!.toBase58()),
         enabled: !!publicKey,
     })
+    const receivedWills: ReceivedWill[] = receivedData?.wills ?? [];
 
 
 
@@ -70,7 +70,7 @@ const WillsForMe = () => {
                         await DeleteWill(sender, publicKey.toBase58())
                         queryClient.invalidateQueries(['received-wills', publicKey.toBase58()])
                     } catch (error) {
-                        console.log("failed to delete")
+                        throw error
                     }
                 }, 5000)
 
@@ -79,9 +79,15 @@ const WillsForMe = () => {
                 setClaimResult(prev => ({ ...prev, [willId]: result }))
             }
             toast.success("successfully calimed you will", { autoClose: 5000 })
-        } catch (err: any) {
-            setClaimResult(prev => ({ ...prev, [willId]: { error: err.message || 'Unknown error' } }))
-            toast.error(` Claim failed: ${err.message || 'Unknown error'}`)
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+
+            setClaimResult(prev => ({
+                ...prev,
+                [willId]: { error: errorMessage }
+            }))
+
+            toast.error(`Claim failed: ${errorMessage}`)
         } finally {
             setLoadingWillId(null)
         }
@@ -96,9 +102,8 @@ const WillsForMe = () => {
     }
 
     if (error) {
-        return <div className="text-red-600 mt-6 text-center">❌ Error: {(error as any).message}</div>
+        return <div className="text-red-600 mt-6 text-center">❌ Error: {error.message}</div>
     }
-    console.log(receivedWills)
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-8">

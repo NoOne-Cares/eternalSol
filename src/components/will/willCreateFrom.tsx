@@ -17,15 +17,13 @@ import { useQueryClient } from '@tanstack/react-query';
 
 
 const WillCreateForm = () => {
-    const wallet = useWallet()
-    const [signedTxBase64, setSignedTxBase64] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [publicKey] = useAtom(walletPublicKey)
     const [connection] = useAtom(oracleConnection)
-    const { signTransaction } = useWallet()
+    const { signTransaction, wallet } = useWallet()
     const queryClient = useQueryClient()
 
-    const [NonceKeypair, setNonceKeyPair] = useState(() => Keypair.generate())
+    const [, setNonceKeyPair] = useState(() => Keypair.generate())
     const nonceKeypairAuth = process.env.NEXT_PUBLIC_SOLANA_SECRET_KEY
     if (!nonceKeypairAuth) throw new Error('Missing SOLANA_SECRET_KEY')
     const secretKey = Uint8Array.from(Buffer.from(nonceKeypairAuth, 'base64'))
@@ -75,20 +73,13 @@ const WillCreateForm = () => {
         setNonceKeyPair(nonceKeypair);
 
 
-        let sig = ""
+
         if (connection) {
-            sig = await createNonceAccount({
+            await createNonceAccount({
                 connection,
                 nonceKeypair,
                 authKeypair
             });
-        }
-        if (sig === "fall to create will") {
-            const notify = () => toast.error("Something went wrong", {
-                autoClose: 5000,
-            });
-            notify()
-            return
         }
         const noncePubkey = nonceKeypair.publicKey;
         let txSignedByNonce = ""
@@ -109,10 +100,10 @@ const WillCreateForm = () => {
             const hashedSignature = encrypt(txSignedByNonce)
             console.log("encrtypt tx:" + " " + hashedSignature)
             return hashedSignature
-        } catch (error: any) {
+        } catch (error) {
             throw error
         }
-    }, [connection, nonceKeypairAuth])
+    }, [connection, authKeypair, publicKey, signTransaction])
 
 
     const [formData, setFormData] = useState({
@@ -216,11 +207,18 @@ const WillCreateForm = () => {
             });
             notify()
 
-        } catch (err: any) {
-            const notify = () => toast.error(err.toString(), {
+        } catch (err: unknown) {
+            let errorMessage = "An unknown error occurred";
+
+            if (err instanceof Error) {
+                errorMessage = err.message;
+            } else if (typeof err === "string") {
+                errorMessage = err;
+            }
+
+            toast.error(errorMessage, {
                 autoClose: 5000,
             });
-            notify()
         }
 
         setIsSubmitting(false);

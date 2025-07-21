@@ -17,7 +17,6 @@ export async function PUT(request: Request) {
             }), { status: 409 });
         }
 
-        // const createdAt = Math.floor(Date.now() / 1000);
 
         const newWill = new WillModal({
             message,
@@ -30,11 +29,11 @@ export async function PUT(request: Request) {
 
         await newWill.save();
 
-        return new Response(JSON.stringify({ success: true, will: newWill }), {
+        return new Response(JSON.stringify({ success: true, message: "will created successfully" }), {
             status: 201,
         });
     } catch (error) {
-        return new Response(JSON.stringify({ success: false, message: "Failed to create will" }), {
+        return new Response(JSON.stringify({ success: false, message: error }), {
             status: 500,
         });
     }

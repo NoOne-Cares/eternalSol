@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     try {
         const wills = await WillModal.find(
             { sender: publicKey },
-            'message reciver sender amount createdAt duration -_id'
+            'message reciver sender amount duration -_id'
         );
 
         return new Response(JSON.stringify(wills), {

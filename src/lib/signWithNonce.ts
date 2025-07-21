@@ -62,8 +62,8 @@ export async function signTransactionWithNonce({
         const serializedTx = signedTx.serialize().toString('base64');
 
         return serializedTx;
-    } catch (err: any) {
+    } catch (err) {
         console.error('❌ Error signing transaction with nonce:', err);
-        throw new Error(err.message || 'Unknown error during signing');
+        throw err;
     }
 }

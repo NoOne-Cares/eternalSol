@@ -1,4 +1,3 @@
-import { PublicKey } from '@solana/web3.js'
 import { connectToDatabase } from '@/lib/db'
 import WillModal from '@/models/will'
 export async function GET(request: Request) {
@@ -15,7 +14,7 @@ export async function GET(request: Request) {
         } catch (error) {
             return Response.json({
                 success: false,
-                message: "server error"
+                message: error
             },
                 {
                     status: 500

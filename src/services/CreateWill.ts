@@ -1,11 +1,16 @@
 import axios from 'axios'
 
+
+interface CreateWillResponse {
+    success: boolean;
+    message: string;
+}
 export const CreateWill = async (message: string,
     sender: string,
     reciver: string,
     duration: number,
     transaction: string,
-    amount: number): Promise<any> => {
+    amount: number): Promise<CreateWillResponse> => {
 
     return axios.put("/api/createwill", { message, sender, reciver, duration, transaction, amount })
         .then(res => {

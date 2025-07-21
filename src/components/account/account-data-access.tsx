@@ -13,6 +13,7 @@ import {
 } from '@solana/web3.js'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+
 export function useGetBalance({ address }: { address: PublicKey }) {
   const { connection } = useConnection()
 
@@ -76,11 +77,11 @@ export function useTransferSol({ address }: { address: PublicKey }) {
         return signature
       } catch (error: unknown) {
 
-
+        console.log(error)
         return
       }
     },
-    onSuccess: async (signature) => {
+    onSuccess: async () => {
 
       await Promise.all([
         client.invalidateQueries({
@@ -114,9 +115,7 @@ export function useRequestAirdrop({ address }: { address: PublicKey }) {
       await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
       return signature
     },
-    onSuccess: async (signature) => {
-      // TODO: Add back Toast
-      // transactionToast(signature)
+    onSuccess: async () => {
       await Promise.all([
         client.invalidateQueries({
           queryKey: ['get-balance', { endpoint: connection.rpcEndpoint, address }],
